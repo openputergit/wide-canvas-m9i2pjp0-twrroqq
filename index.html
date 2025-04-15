@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cards Management Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        /* Skeuomorphism styling */
+        .skeuomorphic-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.12), 
+                       -5px -5px 15px rgba(255,255,255,0.8);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+        
+        .skeuomorphic-button {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.1), 
+                       -3px -3px 8px rgba(255,255,255,0.8);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.8);
+            transition: all 0.2s ease;
+        }
+        
+        .skeuomorphic-button:active {
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1), 
+                       inset -2px -2px 5px rgba(255,255,255,0.8);
+            transform: translateY(1px);
+        }
+        
+        .skeuomorphic-input {
+            background: #f8f9fa;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05), 
+                       inset -2px -2px 5px rgba(255,255,255,0.7);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+        
+        .table-row {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        
+        .table-row:hover {
+            transform: translateX(3px);
+            box-shadow: -3px 0px 0px #4f46e5;
+        }
+        
+        .hidden-info {
+            filter: blur(4px);
+            transition: filter 0.3s ease;
+            user-select: none;
+        }
+        
+        .chip-icon {
+            width: 32px;
+            height: 24px;
+            background: linear-gradient(135deg, #ffdc3c, #f2b807);
+            border-radius: 4px;
+            position: relative;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .chip-icon::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 30%;
+            background: rgba(255,255,255,0.3);
+            top: 20%;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            z-index: 50;
+            min-width: 180px;
+        }
+        
+        .progress-bar-bg {
+            background-color: rgba(226, 232, 240, 0.6);
+        }
+        
+        .progress-bar-blue {
+            background: linear-gradient(90deg, #60a5fa, #3b82f6);
+        }
+        
+        .progress-bar-green {
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+        }
+        
+        .progress-bar-purple {
+            background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+        }
+        
+        .status-active {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #047857;
+        }
+        
+        .status-blocked {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #b91c1c;
+        }
+        
+        .table-header {
+            position: sticky;
+            top: 0;
+            background: #f5f7fa;
+            z-index: 10;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .loader {
+            border-top-color: #4f46e5;
+            animation: spinner 0.8s linear infinite;
+        }
+        
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive table styles */
+        .responsive-table {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Dark theme styling */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a202c;
+                color: #e2e8f0;
+            }
+            
+            .skeuomorphic-card {
+                background: linear-gradient(135deg, #2d3748, #1a202c);
+                box-shadow: 5px 5px 15px rgba(0,0,0,0.3), 
+                           -5px -5px 15px rgba(42,50,65,0.5);
+                border: 1px solid rgba(42,50,65,0.8);
+            }
+            
+            .skeuomorphic-button {
+                background: linear-gradient(135deg, #2d3748, #1a202c);
+                box-shadow: 3px 3px 8px rgba(0,0,0,0.3), 
+                           -3px -3px 8px rgba(42,50,65,0.5);
+                border: 1px solid rgba(42,50,65,0.8);
+                color: #e2e8f0;
+            }
+            
+            .skeuomorphic-button:active {
+                box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3), 
+                           inset -2px -2px 5px rgba(42,50,65,0.5);
+            }
+            
+            .skeuomorphic-input {
+                background: #2d3748;
+                box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2), 
+                           inset -2px -2px 5px rgba(42,50,65,0.3);
+                border: 1px solid rgba(42,50,65,0.8);
+                color: #e2e8f0;
+            }
+            
+            .progress-bar-bg {
+                background-color: rgba(45, 55, 72, 0.6);
+            }
+            
+            .table-header {
+                background: #1a202c;
+                border-bottom-color: #2d3748;
+            }
+            
+            .status-active {
+                background-color: rgba(16, 185, 129, 0.15);
+            }
+            
+            .status-blocked {
+                background-color: rgba(239, 68, 68, 0.15);
+            }
+            
+            .border-gray-200 {
+                border-color: #2d3748 !important;
+            }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .mobile-label {
+                font-size: 0.75rem;
+                color: #6b7280;
+                margin-bottom: 0.25rem;
+            }
+            
+            .mobile-row {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+                padding: 0.75rem;
+            }
+            
+            .mobile-full {
+                grid-column: span 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <h1 class="text-3xl font-bold mb-4 md:mb-0 text-indigo-700 dark:text-indigo-400">Cards Dashboard</h1>
+            <div class="skeuomorphic-card p-3 flex items-center space-x-4">
+                <div class="flex items-center">
+                    <span class="text-sm font-medium">Total Cards:</span>
+                    <span class="ml-1 font-bold">4</span>
+                </div>
+                <div class="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+                <div class="flex items-center">
+                    <span class="text-sm font-medium">Active:</span>
+                    <span class="ml-1 font-bold text-green-600 dark:text-green-400">3</span>
+                </div>
+                <div class="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+                <div class="flex items-center">
+                    <span class="text-sm font-medium">Blocked:</span>
+                    <span class="ml-1 font-bold text-red-600 dark:text-red-400">1</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter and Search Section -->
+        <div class="skeuomorphic-card p-5 mb-8">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-200">Filter Cards</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">Search</label>
+                    <div class="relative">
+                        <input type="text" id="search-input" class="skeuomorphic-input w-full p-3 pr-10 text-gray-700 dark:text-gray-200 focus:outline-none" placeholder="Search by name, number, or serial...">
+                        <i class="bi bi-search absolute right-3 top-3 text-gray-500"></i>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">Card Status</label>
+                    <select id="status-filter" class="skeuomorphic-input w-full p-3 text-gray-700 dark:text-gray-200 focus:outline-none">
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="blocked">Blocked</option>
+                        <option value="expired">Expired</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">Card Type</label>
+                    <select id="type-filter" class="skeuomorphic-input w-full p-3 text-gray-700 dark:text-gray-200 focus:outline-none">
+                        <option value="all">All Types</option>
+                        <option value="personal">Personal</option>
+                        <option value="business">Business</option>
+                        <option value="credit">Credit</option>
+                        <option value="debit">Debit</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards List Table -->
+        <div class="skeuomorphic-card p-5 mb-8">
+            <div id="loading-indicator" class="hidden">
+                <div class="flex justify-center items-center p-6">
+                    <div class="loader h-8 w-8 border-4 border-gray-300 rounded-full"></div>
+                    <span class="ml-3">Loading...</span>
+                </div>
+            </div>
+            
+            <div class="responsive-table">
+                <!-- Table for desktop -->
+                <table class="w-full hidden md:table">
+                    <thead class="table-header">
+                        <tr>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Card Type</th>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Status</th>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Card Number</th>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Expiry</th>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">CVV</th>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Card Holder</th>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Phone</th>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Serial No.</th>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Transaction</th>
+                            <th class="text-right py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cards-list">
+                        <!-- Card 1 -->
+                        <tr class="table-row border-t border-gray-200 dark:border-gray-700" data-status="active" data-type="personal">
+                            <td class="py-4 px-4">
+                                <div class="flex items-center">
+                                    <div class="chip-icon mr-3"></div>
+                                    <span class="text-sm">Personal Card</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="px-2 py-1 rounded-full text-xs status-active font-medium">Active</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="flex items-center">
+                                    <span class="hidden-info card-info" data-hidden="true">4532 8745 9834 7890</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="hidden-info card-info" data-hidden="true">12/25</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="hidden-info card-info" data-hidden="true">***</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm font-medium">John Smith</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm">+1 (555) 123-4567</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm font-mono">SN78392742</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="w-32">
+                                    <div class="relative">
+                                        <div class="progress-bar-bg rounded-full h-2">
+                                            <div class="progress-bar-blue h-2 rounded-full" style="width: 24.5%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="text-xs mt-1">₹2.45L/₹10L</div>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="flex justify-end items-center relative">
+                                    <button class="show-details-btn skeuomorphic-button p-1.5 mr-2 text-indigo-600" title="Show/Hide Details">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="options-btn skeuomorphic-button p-1.5 text-indigo-600" title="More Options">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <div class="dropdown-content skeuomorphic-card py-1 mt-1">
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">View Details</a>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">Transaction History</a>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">Block Card</a>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">Report Lost</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Card 2 -->
+                        <tr class="table-row border-t border-gray-200 dark:border-gray-700" data-status="active" data-type="business">
+                            <td class="py-4 px-4">
+                                <div class="flex items-center">
+                                    <div class="chip-icon mr-3"></div>
+                                    <span class="text-sm">Business Card</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="px-2 py-1 rounded-full text-xs status-active font-medium">Active</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="flex items-center">
+                                    <span class="hidden-info card-info" data-hidden="true">5678 9012 3456 7890</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="hidden-info card-info" data-hidden="true">09/26</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="hidden-info card-info" data-hidden="true">***</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm font-medium">Smith Enterprises</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm">+1 (555) 987-6543</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm font-mono">SN56781234</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="w-32">
+                                    <div class="relative">
+                                        <div class="progress-bar-bg rounded-full h-2">
+                                            <div class="progress-bar-green h-2 rounded-full" style="width: 57.5%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="text-xs mt-1">₹5.75L/₹10L</div>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="flex justify-end items-center relative">
+                                    <button class="show-details-btn skeuomorphic-button p-1.5 mr-2 text-indigo-600" title="Show/Hide Details">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="options-btn skeuomorphic-button p-1.5 text-indigo-600" title="More Options">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <div class="dropdown-content skeuomorphic-card py-1 mt-1">
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">View Details</a>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">Transaction History</a>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">Block Card</a>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">Report Lost</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Card 3 -->
+                        <tr class="table-row border-t border-gray-200 dark:border-gray-700" data-status="blocked" data-type="credit">
+                            <td class="py-4 px-4">
+                                <div class="flex items-center">
+                                    <div class="chip-icon mr-3"></div>
+                                    <span class="text-sm">Credit Card</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="px-2 py-1 rounded-full text-xs status-blocked font-medium">Blocked</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="flex items-center">
+                                    <span class="hidden-info card-info" data-hidden="true">6011 2345 6789 0123</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="hidden-info card-info" data-hidden="true">03/27</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="hidden-info card-info" data-hidden="true">***</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm font-medium">Jane Smith</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm">+1 (555) 234-5678</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm font-mono">SN89012345</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="w-32">
+                                    <div class="relative">
+                                        <div class="progress-bar-bg rounded-full h-2">
+                                            <div class="progress-bar-blue h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="text-xs mt-1">₹0/₹10L</div>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="flex justify-end items-center relative">
+                                    <button class="show-details-btn skeuomorphic-button p-1.5 mr-2 text-indigo-600" title="Show/Hide Details">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="options-btn skeuomorphic-button p-1.5 text-indigo-600" title="More Options">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <div class="dropdown-content skeuomorphic-card py-1 mt-1">
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">View Details</a>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">Transaction History</a>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">Unblock Card</a>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">Report Lost</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Card 4 -->
+                        <tr class="table-row border-t border-gray-200 dark:border-gray-700" data-status="active" data-type="debit">
+                            <td class="py-4 px-4">
+                                <div class="flex items-center">
+                                    <div class="chip-icon mr-3"></div>
+                                    <span class="text-sm">Debit Card</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="px-2 py-1 rounded-full text-xs status-active font-medium">Active</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="flex items-center">
+                                    <span class="hidden-info card-info" data-hidden="true">3456 7890 1234 5678</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="hidden-info card-info" data-hidden="true">07/28</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="hidden-info card-info" data-hidden="true">***</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm font-medium">John Smith</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm">+1 (555) 123-4567</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="text-sm font-mono">SN34567890</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="w-32">
+                                    <div class="relative">
+                                        <div class="progress-bar-bg rounded-full h-2">
+                                            <div class="progress-bar-purple h-2 rounded-full" style="width: 78.5%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="text-xs mt-1">₹7.85L/₹10L</div>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="flex justify-end items-center relative">
+                                    <button class="show-details-btn skeuomorphic-button p-1.5 mr-2 text-indigo-600" title="Show/Hide Details">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="options-btn skeuomorphic-button p-1.5 text-indigo-600" title="More Options">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <div class="dropdown-content skeuomorphic-card py-1 mt-1">
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">View Details</a>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">Transaction History</a>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">Block Card</a>
+                                        <a href="#" class="block px-4 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700">Report Lost</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- Mobile view of cards -->
+                <div class="md:hidden" id="mobile-cards-list">
+                    <!-- Card 1 Mobile -->
+                    <div class="skeuomorphic-card mb-4 overflow-hidden" data-status="active" data-type="personal">
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="chip-icon mr-3"></div>
+                                <div>
+                                    <h3 class="font-medium">Personal Card</h3>
+                                    <p class="text-xs text-gray-500">John Smith</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs status-active font-medium">Active</span>
+                        </div>
+                        <div class="mobile-row">
+                            <div>
+                                <p class="mobile-label">Card Number</p>
+                                <p class="hidden-info card-info text-sm" data-hidden="true">4532 8745 9834 7890</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Expiry Date</p>
+                                <p class="hidden-info card-info text-sm" data-hidden="true">12/25</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">CVV</p>
+                                <p class="hidden-info card-info text-sm" data-hidden="true">***</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Serial No.</p>
+                                <p class="text-sm font-mono">SN78392742</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Phone</p>
+                                <p class="text-sm">+1 (555) 123-4567</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Transactions</p>
+                                <div class="relative">
+                                    <div class="progress-bar-bg rounded-full h-2">
+                                        <div class="progress-bar-blue h-2 rounded-full" style="width: 24.5%"></div>
+                                    </div>
+                                </div>
+                                <div class="text-xs mt-1">₹2.45L/₹10L</div>
+                            </div>
+                        </div>
+                        <div class="p-3 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+                            <button class="show-details-btn-mobile skeuomorphic-button px-4 py-1.5 text-sm text-indigo-600 flex items-center">
+                                <i class="bi bi-eye mr-1"></i> Show Details
+                            </button>
+                            <button class="options-btn-mobile skeuomorphic-button px-4 py-1.5 text-sm text-indigo-600 flex items-center">
+                                <i class="bi bi-three-dots-vertical mr-1"></i> Options
+                            </button>
+                        </div>
+                        <div class="mobile-dropdown hidden p-3 border-t border-gray-200 dark:border-gray-700">
+                            <div class="grid grid-cols-2 gap-2">
+                                <button class="skeuomorphic-button p-2 text-sm">View Details</button>
+                                <button class="skeuomorphic-button p-2 text-sm">Transaction History</button>
+                                <button class="skeuomorphic-button p-2 text-sm">Block Card</button>
+                                <button class="skeuomorphic-button p-2 text-sm">Report Lost</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card 2 Mobile -->
+                    <div class="skeuomorphic-card mb-4 overflow-hidden" data-status="active" data-type="business">
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="chip-icon mr-3"></div>
+                                <div>
+                                    <h3 class="font-medium">Business Card</h3>
+                                    <p class="text-xs text-gray-500">Smith Enterprises</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs status-active font-medium">Active</span>
+                        </div>
+                        <div class="mobile-row">
+                            <div>
+                                <p class="mobile-label">Card Number</p>
+                                <p class="hidden-info card-info text-sm" data-hidden="true">5678 9012 3456 7890</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Expiry Date</p>
+                                <p class="hidden-info card-info text-sm" data-hidden="true">09/26</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">CVV</p>
+                                <p class="hidden-info card-info text-sm" data-hidden="true">***</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Serial No.</p>
+                                <p class="text-sm font-mono">SN56781234</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Phone</p>
+                                <p class="text-sm">+1 (555) 987-6543</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Transactions</p>
+                                <div class="relative">
+                                    <div class="progress-bar-bg rounded-full h-2">
+                                        <div class="progress-bar-green h-2 rounded-full" style="width: 57.5%"></div>
+                                    </div>
+                                </div>
+                                <div class="text-xs mt-1">₹5.75L/₹10L</div>
+                            </div>
+                        </div>
+                        <div class="p-3 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+                            <button class="show-details-btn-mobile skeuomorphic-button px-4 py-1.5 text-sm text-indigo-600 flex items-center">
+                                <i class="bi bi-eye mr-1"></i> Show Details
+                            </button>
+                            <button class="options-btn-mobile skeuomorphic-button px-4 py-1.5 text-sm text-indigo-600 flex items-center">
+                                <i class="bi bi-three-dots-vertical mr-1"></i> Options
+                            </button>
+                        </div>
+                        <div class="mobile-dropdown hidden p-3 border-t border-gray-200 dark:border-gray-700">
+                            <div class="grid grid-cols-2 gap-2">
+                                <button class="skeuomorphic-button p-2 text-sm">View Details</button>
+                                <button class="skeuomorphic-button p-2 text-sm">Transaction History</button>
+                                <button class="skeuomorphic-button p-2 text-sm">Block Card</button>
+                                <button class="skeuomorphic-button p-2 text-sm">Report Lost</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card 3 Mobile -->
+                    <div class="skeuomorphic-card mb-4 overflow-hidden" data-status="blocked" data-type="credit">
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="chip-icon mr-3"></div>
+                                <div>
+                                    <h3 class="font-medium">Credit Card</h3>
+                                    <p class="text-xs text-gray-500">Jane Smith</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs status-blocked font-medium">Blocked</span>
+                        </div>
+                        <div class="mobile-row">
+                            <div>
+                                <p class="mobile-label">Card Number</p>
+                                <p class="hidden-info card-info text-sm" data-hidden="true">6011 2345 6789 0123</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Expiry Date</p>
+                                <p class="hidden-info card-info text-sm" data-hidden="true">03/27</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">CVV</p>
+                                <p class="hidden-info card-info text-sm" data-hidden="true">***</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Serial No.</p>
+                                <p class="text-sm font-mono">SN89012345</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Phone</p>
+                                <p class="text-sm">+1 (555) 234-5678</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Transactions</p>
+                                <div class="relative">
+                                    <div class="progress-bar-bg rounded-full h-2">
+                                        <div class="progress-bar-blue h-2 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div class="text-xs mt-1">₹0/₹10L</div>
+                            </div>
+                            <div class="mobile-full">
+                                <p class="text-xs text-red-600 flex items-center">
+                                    <i class="bi bi-exclamation-triangle mr-1"></i> Blocked on 12 May 2023 due to suspicious activity
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-3 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+                            <button class="show-details-btn-mobile skeuomorphic-button px-4 py-1.5 text-sm text-indigo-600 flex items-center">
+                                <i class="bi bi-eye mr-1"></i> Show Details
+                            </button>
+                            <button class="options-btn-mobile skeuomorphic-button px-4 py-1.5 text-sm text-indigo-600 flex items-center">
+                                <i class="bi bi-three-dots-vertical mr-1"></i> Options
+                            </button>
+                        </div>
+                        <div class="mobile-dropdown hidden p-3 border-t border-gray-200 dark:border-gray-700">
+                            <div class="grid grid-cols-2 gap-2">
+                                <button class="skeuomorphic-button p-2 text-sm">View Details</button>
+                                <button class="skeuomorphic-button p-2 text-sm">Transaction History</button>
+                                <button class="skeuomorphic-button p-2 text-sm">Unblock Card</button>
+                                <button class="skeuomorphic-button p-2 text-sm">Report Lost</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card 4 Mobile -->
+                    <div class="skeuomorphic-card mb-4 overflow-hidden" data-status="active" data-type="debit">
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="chip-icon mr-3"></div>
+                                <div>
+                                    <h3 class="font-medium">Debit Card</h3>
+                                    <p class="text-xs text-gray-500">John Smith</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs status-active font-medium">Active</span>
+                        </div>
+                        <div class="mobile-row">
+                            <div>
+                                <p class="mobile-label">Card Number</p>
+                                <p class="hidden-info card-info text-sm" data-hidden="true">3456 7890 1234 5678</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Expiry Date</p>
+                                <p class="hidden-info card-info text-sm" data-hidden="true">07/28</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">CVV</p>
+                                <p class="hidden-info card-info text-sm" data-hidden="true">***</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Serial No.</p>
+                                <p class="text-sm font-mono">SN34567890</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Phone</p>
+                                <p class="text-sm">+1 (555) 123-4567</p>
+                            </div>
+                            <div>
+                                <p class="mobile-label">Transactions</p>
+                                <div class="relative">
+                                    <div class="progress-bar-bg rounded-full h-2">
+                                        <div class="progress-bar-purple h-2 rounded-full" style="width: 78.5%"></div>
+                                    </div>
+                                </div>
+                                <div class="text-xs mt-1">₹7.85L/₹10L</div>
+                            </div>
+                        </div>
+                        <div class="p-3 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+                            <button class="show-details-btn-mobile skeuomorphic-button px-4 py-1.5 text-sm text-indigo-600 flex items-center">
+                                <i class="bi bi-eye mr-1"></i> Show Details
+                            </button>
+                            <button class="options-btn-mobile skeuomorphic-button px-4 py-1.5 text-sm text-indigo-600 flex items-center">
+                                <i class="bi bi-three-dots-vertical mr-1"></i> Options
+                            </button>
+                        </div>
+                        <div class="mobile-dropdown hidden p-3 border-t border-gray-200 dark:border-gray-700">
+                            <div class="grid grid-cols-2 gap-2">
+                                <button class="skeuomorphic-button p-2 text-sm">View Details</button>
+                                <button class="skeuomorphic-button p-2 text-sm">Transaction History</button>
+                                <button class="skeuomorphic-button p-2 text-sm">Block Card</button>
+                                <button class="skeuomorphic-button p-2 text-sm">Report Lost</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Footer -->
+        <div class="skeuomorphic-card p-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center">
+                <button id="add-card-btn" class="skeuomorphic-button py-3 px-6 text-indigo-700 dark:text-indigo-400 font-medium flex items-center mb-4 sm:mb-0 w-full sm:w-auto justify-center">
+                    <i class="bi bi-plus-lg mr-2"></i> Add New Card
+                </button>
+                <div class="flex space-x-4">
+                    <span class="text-sm text-gray-600 dark:text-gray-300" id="cards-count">Showing 4 cards</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show/Hide Card Details
+        document.querySelectorAll('.show-details-btn, .show-details-btn-mobile').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Find all hidden info elements in the parent row or card
+                const parent = button.closest('tr') || button.closest('.skeuomorphic-card');
+                const hiddenInfos = parent.querySelectorAll('.card-info');
+                const eyeIcon = button.querySelector('i');
+                
+                // Show loading animation
+                if (button.classList.contains('show-details-btn-mobile')) {
+                    button.innerHTML = '<i class="bi bi-arrow-repeat mr-1 animate-spin"></i> Loading...';
+                    setTimeout(() => {
+                        updateVisibility();
+                    }, 500);
+                } else {
+                    updateVisibility();
+                }
+                
+                function updateVisibility() {
+                    hiddenInfos.forEach(info => {
+                        if (info.dataset.hidden === "true") {
+                            info.style.filter = "none";
+                            info.dataset.hidden = "false";
+                            if (eyeIcon) {
+                                eyeIcon.classList.remove('bi-eye');
+                                eyeIcon.classList.add('bi-eye-slash');
+                            }
+                            if (button.classList.contains('show-details-btn-mobile')) {
+                                button.innerHTML = '<i class="bi bi-eye-slash mr-1"></i> Hide Details';
+                            }
+                        } else {
+                            info.style.filter = "blur(4px)";
+                            info.dataset.hidden = "true";
+                            if (eyeIcon) {
+                                eyeIcon.classList.remove('bi-eye-slash');
+                                eyeIcon.classList.add('bi-eye');
+                            }
+                            if (button.classList.contains('show-details-btn-mobile')) {
+                                button.innerHTML = '<i class="bi bi-eye mr-1"></i> Show Details';
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        // Toggle Options Dropdown for Desktop View
+        document.querySelectorAll('.options-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Find the dropdown associated with this button
+                const dropdown = button.nextElementSibling;
+                const allDropdowns = document.querySelectorAll('.dropdown-content');
+                
+                // Close all other dropdowns
+                allDropdowns.forEach(d => {
+                    if (d !== dropdown) d.style.display = 'none';
+                });
+                
+                // Toggle this dropdown
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+        
+        // Toggle Options Dropdown for Mobile View
+        document.querySelectorAll('.options-btn-mobile').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const parent = button.closest('.skeuomorphic-card');
+                const dropdown = parent.querySelector('.mobile-dropdown');
+                
+                // Show loading animation
+                button.innerHTML = '<i class="bi bi-arrow-repeat mr-1 animate-spin"></i> Loading...';
+                
+                setTimeout(() => {
+                    // Toggle the dropdown
+                    if (dropdown.classList.contains('hidden')) {
+                        dropdown.classList.remove('hidden');
+                        button.innerHTML = '<i class="bi bi-x-lg mr-1"></i> Close';
+                    } else {
+                        dropdown.classList.add('hidden');
+                        button.innerHTML = '<i class="bi bi-three-dots-vertical mr-1"></i> Options';
+                    }
+                }, 300);
+            });
+        });
+
+        // Close dropdowns when clicking elsewhere on the document
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.options-btn') && !e.target.closest('.dropdown-content')) {
+                document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+
+        // Filtering functionality
+        const searchInput = document.getElementById('search-input');
+        const statusFilter = document.getElementById('status-filter');
+        const typeFilter = document.getElementById('type-filter');
+        const desktopRows = document.querySelectorAll('#cards-list tr');
+        const mobileCards = document.querySelectorAll('#mobile-cards-list > div');
+        const cardsCount = document.getElementById('cards-count');
+
+        function applyFilters() {
+            // Show loading indicator
+            document.getElementById('loading-indicator').classList.remove('hidden');
+            
+            setTimeout(() => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const statusValue = statusFilter.value;
+                const typeValue = typeFilter.value;
+                let visibleCount = 0;
+                
+                // Filter desktop rows
+                desktopRows.forEach(row => {
+                    const status = row.dataset.status;
+                    const type = row.dataset.type;
+                    const content = row.textContent.toLowerCase();
+                    
+                    const matchesSearch = searchTerm === '' || content.includes(searchTerm);
+                    const matchesStatus = statusValue === 'all' || status === statusValue;
+                    const matchesType = typeValue === 'all' || type === typeValue;
+                    
+                    if (matchesSearch && matchesStatus && matchesType) {
+                        row.classList.remove('hidden');
+                        visibleCount++;
+                    } else {
+                        row.classList.add('hidden');
+                    }
+                });
+                
+                // Filter mobile cards
+                mobileCards.forEach(card => {
+                    const status = card.dataset.status;
+                    const type = card.dataset.type;
+                    const content = card.textContent.toLowerCase();
+                    
+                    const matchesSearch = searchTerm === '' || content.includes(searchTerm);
+                    const matchesStatus = statusValue === 'all' || status === statusValue;
+                    const matchesType = typeValue === 'all' || type === typeValue;
+                    
+                    if (matchesSearch && matchesStatus && matchesType) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+                
+                // Update card count
+                cardsCount.textContent = `Showing ${visibleCount} cards`;
+                
+                // Hide loading indicator
+                document.getElementById('loading-indicator').classList.add('hidden');
+            }, 300);
+        }
+
+        // Add event listeners for filtering
+        searchInput.addEventListener('input', applyFilters);
+        statusFilter.addEventListener('change', applyFilters);
+        typeFilter.addEventListener('change', applyFilters);
+
+        // Add New Card button functionality
+        document.getElementById('add-card-btn').addEventListener('click', function() {
+            // Simulate a loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="bi bi-arrow-repeat animate-spin mr-2"></i> Processing...';
+            this.disabled = true;
+            
+            setTimeout(() => {
+                alert('Add new card functionality would open a form dialog!');
+                this.innerHTML = originalText;
+                this.disabled = false;
+            }, 800);
+        });
+        
+        // Handle card row hover effects
+        document.querySelectorAll('.table-row').forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = 'rgba(79, 70, 229, 0.05)'; 
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = '';
+            });
+        });
+
+        // Initialize the interface
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial display of all cards
+            applyFilters();
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
